@@ -55,7 +55,7 @@ taskset -c ${CORE} nice -n ${PRIO} ./fullbench$1 -B3 -C048 -D0567 ../test-files/
 taskset -c ${CORE} nice -n ${PRIO} ./fullbench$1 -B4 -C048 -D0567 ../test-files/* 2> >(tee run-64K.out >&2)
 taskset -c ${CORE} nice -n ${PRIO} ./fullbench$1 -B5 -C048 -D0567 ../test-files/* 2> >(tee run-256K.out >&2)
 taskset -c ${CORE} nice -n ${PRIO} ./fullbench$1 -B6 -C048 -D0567 ../test-files/* 2> >(tee run-1M.out >&2)
-taskset -c ${CORE} nice -n ${PRIO} ./fullbench$1 -B7 -C048 -D0567 ../test-files/* 2> >(tee run-4k.out >&2)
+taskset -c ${CORE} nice -n ${PRIO} ./fullbench$1 -B7 -C048 -D0567 ../test-files/* 2> >(tee run-4M.out >&2)
 
 # Put the governor back to "ondemand" the likely initial default.  Change this if you dont like it.
 echo ondemand | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor >/dev/null
