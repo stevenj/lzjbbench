@@ -49,13 +49,17 @@ done
 # O1 - use the benchmark built with -O.
 # 32 - use the 32 bit version of the benchmark.
 # -dbg - use the benchmark built for debugging with no optimization.
-taskset -c ${CORE} nice -n ${PRIO} ./fullbench$1 -B1 -C048 -D0567 ../test-files/* 2> >(tee run-1K.out >&2)
-taskset -c ${CORE} nice -n ${PRIO} ./fullbench$1 -B2 -C048 -D0567 ../test-files/* 2> >(tee run-4K.out >&2)
-taskset -c ${CORE} nice -n ${PRIO} ./fullbench$1 -B3 -C048 -D0567 ../test-files/* 2> >(tee run-16K.out >&2)
-taskset -c ${CORE} nice -n ${PRIO} ./fullbench$1 -B4 -C048 -D0567 ../test-files/* 2> >(tee run-64K.out >&2)
-taskset -c ${CORE} nice -n ${PRIO} ./fullbench$1 -B5 -C048 -D0567 ../test-files/* 2> >(tee run-256K.out >&2)
-taskset -c ${CORE} nice -n ${PRIO} ./fullbench$1 -B6 -C048 -D0567 ../test-files/* 2> >(tee run-1M.out >&2)
-taskset -c ${CORE} nice -n ${PRIO} ./fullbench$1 -B7 -C048 -D0567 ../test-files/* 2> >(tee run-4M.out >&2)
+
+TESTDIR="../test-files"
+TESTFILES=$(find $TESTDIR -type f -iname "*" -print | sort | tr \\n ' ')
+
+taskset -c ${CORE} nice -n ${PRIO} ./fullbench$1 -B1 -C048 -D0567 ${TESTFILES} 2> >(tee run-1K.out >&2)
+taskset -c ${CORE} nice -n ${PRIO} ./fullbench$1 -B2 -C048 -D0567 ${TESTFILES} 2> >(tee run-4K.out >&2)
+taskset -c ${CORE} nice -n ${PRIO} ./fullbench$1 -B3 -C048 -D0567 ${TESTFILES} 2> >(tee run-16K.out >&2)
+taskset -c ${CORE} nice -n ${PRIO} ./fullbench$1 -B4 -C048 -D0567 ${TESTFILES} 2> >(tee run-64K.out >&2)
+taskset -c ${CORE} nice -n ${PRIO} ./fullbench$1 -B5 -C048 -D0567 ${TESTFILES} 2> >(tee run-256K.out >&2)
+taskset -c ${CORE} nice -n ${PRIO} ./fullbench$1 -B6 -C048 -D0567 ${TESTFILES} 2> >(tee run-1M.out >&2)
+taskset -c ${CORE} nice -n ${PRIO} ./fullbench$1 -B7 -C048 -D0567 ${TESTFILES} 2> >(tee run-4M.out >&2)
 
 # Put the governor back to "ondemand" the likely initial default.  Change this if you dont like it.
 echo ondemand | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor >/dev/null
