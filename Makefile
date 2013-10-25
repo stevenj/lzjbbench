@@ -59,7 +59,7 @@ SOURCES = $(TEXT) $(NONTEXT)
 
 default: lz4 lz4c
 
-all: lz4 lz4c lz4c32 fuzzer fuzzer32 fullbench fullbenchO2 fullbenchO1 fullbench-dbg fullbench32
+all: lz4 lz4c lz4c32 fuzzer fuzzer32 fullbench fullbenchK fullbenchK3 fullbenchO2 fullbenchO1 fullbench-dbg fullbench32
 
 lz4: lz4.c lz4hc.c bench.c xxhash.c lz4cli.c
 	$(CC)      -O3 $(CFLAGS) -DDISABLE_LZ4C_LEGACY_OPTIONS $^ -o $@$(EXT)
@@ -80,6 +80,12 @@ fuzzer32: lz4.c lz4hc.c fuzzer.c
 fullbench  : lz4.c lz4hc.c lzjb.c xxhash.c fullbench.c
 	$(CC)    -O3 $(CFLAGS) $^ -o $@$(EXT)
 
+fullbenchK : lz4.c lz4hc.c lzjb.c xxhash.c fullbench.c
+	$(CC)  -O2 -DKERN_DEOPT $(CFLAGS) $^ -o $@$(EXT)
+
+fullbenchK3 : lz4.c lz4hc.c lzjb.c xxhash.c fullbench.c
+	$(CC)  -O3 -DKERN_DEOPT $(CFLAGS) $^ -o $@$(EXT)
+
 fullbenchO2  : lz4.c lz4hc.c lzjb.c xxhash.c fullbench.c
 	$(CC)    -O2 $(CFLAGS) $^ -o $@$(EXT)
 
@@ -94,7 +100,7 @@ fullbench32: lz4.c lz4hc.c lzjb.c xxhash.c fullbench.c
 
 clean:
 	@rm -f core *.o lz4$(EXT) lz4c$(EXT) lz4c32$(EXT) \
-        fuzzer$(EXT) fuzzer32$(EXT) fullbench$(EXT) fullbench32$(EXT) fullbenchO2$(EXT) fullbenchO1$(EXT) fullbench-dbg$(EXT)
+        fuzzer$(EXT) fuzzer32$(EXT) fullbench$(EXT) fullbench32$(EXT) fullbenchO2$(EXT) fullbenchO1$(EXT) fullbench-dbg$(EXT) fullbenchK$(EXT) fullbenchK3$(EXT)
 	@echo Cleaning completed
 
 

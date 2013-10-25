@@ -50,7 +50,15 @@ extern "C" {
 // Simple Functions
 //****************************
 
+
+#ifdef KERN_DEOPT
+__attribute__ ((__target__ ("no-mmx,no-sse")))
+#endif
 int LZ4_compress        (const char* source, char* dest, int inputSize);
+
+#ifdef KERN_DEOPT
+__attribute__ ((__target__ ("no-mmx,no-sse")))
+#endif
 int LZ4_decompress_safe (const char* source, char* dest, int inputSize, int maxOutputSize);
 
 /*
@@ -92,6 +100,9 @@ LZ4_compressBound() :
 */
 
 
+#ifdef KERN_DEOPT
+__attribute__ ((__target__ ("no-mmx,no-sse")))
+#endif
 int LZ4_compress_limitedOutput (const char* source, char* dest, int inputSize, int maxOutputSize);
 
 /*
@@ -107,6 +118,9 @@ LZ4_compress_limitedOutput() :
 */
 
 
+#ifdef KERN_DEOPT
+__attribute__ ((__target__ ("no-mmx,no-sse")))
+#endif
 int LZ4_decompress_fast (const char* source, char* dest, int outputSize);
 
 /*
@@ -120,6 +134,9 @@ LZ4_decompress_fast() :
            Destination buffer must be already allocated. Its size must be a minimum of 'outputSize' bytes.
 */
 
+#ifdef KERN_DEOPT
+__attribute__ ((__target__ ("no-mmx,no-sse")))
+#endif
 int LZ4_decompress_safe_partial (const char* source, char* dest, int inputSize, int targetOutputSize, int maxOutputSize);
 
 /*
@@ -141,7 +158,13 @@ LZ4_decompress_safe_partial() :
 //****************************
 
 void* LZ4_create (const char* inputBuffer);
+#ifdef KERN_DEOPT
+__attribute__ ((__target__ ("no-mmx,no-sse")))
+#endif
 int   LZ4_compress_continue (void* LZ4_Data, const char* source, char* dest, int inputSize);
+#ifdef KERN_DEOPT
+__attribute__ ((__target__ ("no-mmx,no-sse")))
+#endif
 int   LZ4_compress_limitedOutput_continue (void* LZ4_Data, const char* source, char* dest, int inputSize, int maxOutputSize);
 char* LZ4_slideInputBuffer (void* LZ4_Data);
 int   LZ4_free (void* LZ4_Data);
@@ -176,7 +199,13 @@ When compression is completed, a call to LZ4_free() will release the memory used
 */
 
 
+#ifdef KERN_DEOPT
+__attribute__ ((__target__ ("no-mmx,no-sse")))
+#endif
 int LZ4_decompress_safe_withPrefix64k (const char* source, char* dest, int inputSize, int maxOutputSize);
+#ifdef KERN_DEOPT
+__attribute__ ((__target__ ("no-mmx,no-sse")))
+#endif
 int LZ4_decompress_fast_withPrefix64k (const char* source, char* dest, int outputSize);
 
 /*
@@ -191,7 +220,13 @@ int LZ4_decompress_fast_withPrefix64k (const char* source, char* dest, int outpu
 // Obsolete Functions
 //****************************
 
+#ifdef KERN_DEOPT
+__attribute__ ((__target__ ("no-mmx,no-sse")))
+#endif
 static inline int LZ4_uncompress (const char* source, char* dest, int outputSize) { return LZ4_decompress_fast(source, dest, outputSize); }
+#ifdef KERN_DEOPT
+__attribute__ ((__target__ ("no-mmx,no-sse")))
+#endif
 static inline int LZ4_uncompress_unknownOutputSize (const char* source, char* dest, int isize, int maxOutputSize) { return LZ4_decompress_safe(source, dest, isize, maxOutputSize); }
 
 /*

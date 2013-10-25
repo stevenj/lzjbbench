@@ -47,6 +47,11 @@
 #define        LEMPEL_SIZE        1024
 
 /*ARGSUSED*/
+#ifdef KERN_DEOPT
+size_t
+lzjb_compress(void *s_start, void *d_start, size_t s_len, size_t d_len, int n)
+__attribute__ ((__target__ ("no-mmx,no-sse")));
+#endif
 size_t
 lzjb_compress(void *s_start, void *d_start, size_t s_len, size_t d_len, int n)
 {
@@ -101,6 +106,11 @@ lzjb_compress(void *s_start, void *d_start, size_t s_len, size_t d_len, int n)
 
 
 /*ARGSUSED*/
+#ifdef KERN_DEOPT
+int
+lzjb_decompress(void *s_start, void *d_start, size_t s_len, size_t d_len, int n)
+__attribute__ ((__target__ ("no-mmx,no-sse")));
+#endif
 int
 lzjb_decompress(void *s_start, void *d_start, size_t s_len, size_t d_len, int n)
 {
@@ -137,6 +147,11 @@ lzjb_decompress(void *s_start, void *d_start, size_t s_len, size_t d_len, int n)
 
 /*** Modified versions for testing are below here ***/
 /*ARGSUSED*/
+#ifdef KERN_DEOPT
+int
+lzjb_decompress_bsd(void *s_start, void *d_start, size_t s_len, size_t d_len, int n)
+__attribute__ ((__target__ ("no-mmx,no-sse")));
+#endif
 int
 lzjb_decompress_bsd(void *s_start, void *d_start, size_t s_len, size_t d_len, int n)
 {
@@ -247,6 +262,11 @@ typedef struct {uint16_t v;} __attribute__ ((packed)) uint16_t_S;
 #define LZJB_QUICKCOPY(d,s,e)     { do { LZJB_COPYSTEP(d,s) } while (d<e);  }
 #define LZJB_SLOWCOPY(d,s,e)      { while (d<e) { *d++ = *s++; } }
 
+#ifdef KERN_DEOPT
+int
+lzjb_decompress_hack(void *s_start, void *d_start, size_t s_len, size_t d_len, int n)
+__attribute__ ((__target__ ("no-mmx,no-sse")));
+#endif
 int
 lzjb_decompress_hack(void *s_start, void *d_start, size_t s_len, size_t d_len, int n)
 {
@@ -376,7 +396,7 @@ lzjb_decompress_hack(void *s_start, void *d_start, size_t s_len, size_t d_len, i
                                     dst += STEPSIZE;
                                 }
                                 break;
-#if NOT_TESTED_YET
+#ifdef NOT_TESTED_YET
                                 /* New RLE Options */
                               case 9 :
                                 r = A8BYTES(cpy_s);
