@@ -353,6 +353,30 @@ static inline int local_LZJB_decompress_hack(const char* in, char* out, int inSi
   return outSize;
 }
 
+extern size_t lz4_compress(void *s_start, void *d_start, size_t s_len, size_t d_len, int n);
+static inline int local_LZ4_compress_zfs(const char* in, char* out, int inSize)
+{
+  return lz4_compress((void*)in, (void*)out, inSize, LZ4_compressBound(chunkSize), 0);
+}
+
+extern void lz4_init(void);
+static void* local_LZ4_compress_zfs_init(const char* unused)
+{
+  lz4_init();
+  return NULL;
+}
+
+extern int lz4_decompress(void *s_start, void *d_start, size_t s_len, size_t d_len, int n);
+static inline int local_LZ4_decompress_zfs(const char* in, char* out, int inSize, int outSize)
+{
+  int dsize = lz4_decompress((void*)in, (void*)out, inSize, outSize, 0);
+  if (dsize != 0) {
+    return dsize;
+  }
+
+  return outSize;
+}
+
 void hexdump(unsigned char *buffer, int index, int long width, int error, uint64_t offset)
 {
   int i;
@@ -438,21 +462,46 @@ int fullSpeedBench(char** fileNamesTable, int nbFiles)
 {
   int fileIdx=0;
   char* orig_buff;
-# define NB_COMPRESSION_ALGORITHMS 9
-# define FIRST_LZJB_COMP 9
+# define NB_COMPRESSION_ALGORITHMS 5
+# define FIRST_LZJB_COMP 3
 # define MINCOMPRESSIONCHAR '0'
 # define MAXCOMPRESSIONCHAR (MINCOMPRESSIONCHAR + NB_COMPRESSION_ALGORITHMS)
-  static char* compressionNames[] = { "LZ4_compress", "LZ4_compress_limitedOutput", "LZ4_compress_continue", "LZ4_compress_limitedOutput_continue", "LZ4_compressHC", "LZ4_compressHC_limitedOutput", "LZ4_compressHC_continue", "LZ4_compressHC_limitedOutput_continue", "ZFS lzjb_compress", "HAX lzjb_compress" };
+  static char* compressionNames[] = { "LZ4_compress",
+      /*
+                                      "LZ4_compress_limitedOutput",
+                                      "LZ4_compress_continue",
+                                      "LZ4_compress_limitedOutput_continue",
+    */
+                                      "LZ4_compressHC",
+    /*
+                                      "LZ4_compressHC_limitedOutput",
+                                      "LZ4_compressHC_continue",
+                                      "LZ4_compressHC_limitedOutput_continue",
+    */
+                                      "ZFS_lz4_compress",
+                                      "ZFS_lzjb_compress",
+                                      "HAX_lzjb_compress" };
+
   double totalCTime[NB_COMPRESSION_ALGORITHMS] = {0};
   double totalCSize[NB_COMPRESSION_ALGORITHMS] = {0};
 
   /* TODO: INCREASE THIS FOR EACH NEW DECOMPRESSOR */
-# define NB_DECOMPRESSION_ALGORITHMS 8
+# define NB_DECOMPRESSION_ALGORITHMS 5
 # define MINDECOMPRESSIONCHAR '0'
 # define MAXDECOMPRESSIONCHAR (MINDECOMPRESSIONCHAR + NB_DECOMPRESSION_ALGORITHMS)
-# define FIRST_LZJB_DECO 5
+# define FIRST_LZJB_DECO 2
   /* TODO: ADD A DECOMPRESSOR LABEL HERE */
-  static char* decompressionNames[] = { "LZ4_decompress_fast", "LZ4_decompress_fast_withPrefix64k", "LZ4_decompress_safe", "LZ4_decompress_safe_withPrefix64k", "LZ4_decompress_safe_partial", "ZFS lzjb_decompress", "BSD lzjb_decompress", "HAX lzjb_decompress" };
+  static char* decompressionNames[] = { "LZ4_decompress_fast",
+      /*
+                                        "LZ4_decompress_fast_withPrefix64k",
+                                        "LZ4_decompress_safe",
+                                        "LZ4_decompress_safe_withPrefix64k",
+                                        "LZ4_decompress_safe_partial",
+        */
+                                        "ZFS_lz4_decompress",
+                                        "ZFS_lzjb_decompress",
+                                        "BSD_lzjb_decompress",
+                                        "HAX lzjb_decompress" };
   double totalDTime[NB_DECOMPRESSION_ALGORITHMS] = {0};
 
   U64 totals = 0;
@@ -478,7 +527,7 @@ int fullSpeedBench(char** fileNamesTable, int nbFiles)
       inFile = fopen( inFileName, "rb" );
       if (inFile==NULL)
       {
-        DISPLAY( "Pb opening %s\n", inFileName);
+        DISPLAY( "Problem opening %s\n", inFileName);
         return 11;
       }
 
@@ -573,15 +622,19 @@ int fullSpeedBench(char** fileNamesTable, int nbFiles)
             switch(cAlgNb)
             {
             case 0: compressionFunction = LZ4_compress; break;
-            case 1: compressionFunction = local_LZ4_compress_limitedOutput; break;
+/*          case 1: compressionFunction = local_LZ4_compress_limitedOutput; break;
             case 2: compressionFunction = local_LZ4_compress_continue; initFunction = LZ4_create; break;
             case 3: compressionFunction = local_LZ4_compress_limitedOutput_continue; initFunction = LZ4_create; break;
-            case 4: compressionFunction = LZ4_compressHC; break;
+*/
+            case 1: compressionFunction = LZ4_compressHC; break;
+/*
             case 5: compressionFunction = local_LZ4_compressHC_limitedOutput; break;
             case 6: compressionFunction = local_LZ4_compressHC_continue; initFunction = LZ4_createHC; break;
             case 7: compressionFunction = local_LZ4_compressHC_limitedOutput_continue; initFunction = LZ4_createHC; break;
-            case 8: compressionFunction = local_LZJB_compress_zfs; break;
-            case 9: compressionFunction = local_LZJB_compress_hack; break;
+*/
+            case 2: compressionFunction = local_LZ4_compress_zfs; initFunction = local_LZ4_compress_zfs_init; break;
+            case 3: compressionFunction = local_LZJB_compress_zfs; break;
+            case 4: compressionFunction = local_LZJB_compress_hack; break;
             default : DISPLAY("ERROR ! Bad algorithm Id !! \n"); free(chunkP); return 1;
             }
 
@@ -651,14 +704,18 @@ int fullSpeedBench(char** fileNamesTable, int nbFiles)
             switch(dAlgNb)
             {
             case 0: decompressionFunction = local_LZ4_decompress_fast; break;
+/*
             case 1: decompressionFunction = local_LZ4_decompress_fast_withPrefix64k; break;
             case 2: decompressionFunction = LZ4_decompress_safe; break;
             case 3: decompressionFunction = LZ4_decompress_safe_withPrefix64k; break;
             case 4: decompressionFunction = local_LZ4_decompress_safe_partial; break;
+*/
             /* TODO: ADD NEW DECOMPRESSORS HERE */
-            case 5: decompressionFunction = local_LZJB_decompress_original; break;
-            case 6: decompressionFunction = local_LZJB_decompress_bsd; break;
-            case 7: decompressionFunction = local_LZJB_decompress_hack; break;
+            case 1: decompressionFunction = local_LZ4_decompress_zfs; break;
+
+            case 2: decompressionFunction = local_LZJB_decompress_original; break;
+            case 3: decompressionFunction = local_LZJB_decompress_bsd; break;
+            case 4: decompressionFunction = local_LZJB_decompress_hack; break;
 
             default : DISPLAY("ERROR ! Bad algorithm Id !! \n"); free(chunkP); return 1;
             }

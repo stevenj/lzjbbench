@@ -77,25 +77,25 @@ fuzzer  : lz4.c lz4hc.c fuzzer.c
 fuzzer32: lz4.c lz4hc.c fuzzer.c
 	$(CC) -m32 -O3 $(CFLAGS) $^ -o $@$(EXT)
 
-fullbench  : lz4.c lz4hc.c lzjb.c xxhash.c fullbench.c
+fullbench  : lz4.c lz4hc.c lzjb.c lzxx.c xxhash.c fullbench.c
 	$(CC)    -O3 $(CFLAGS) $^ -o $@$(EXT)
 
-fullbenchK : lz4.c lz4hc.c lzjb.c xxhash.c fullbench.c
+fullbenchK : lz4.c lz4hc.c lzjb.c lzxx.c xxhash.c fullbench.c
 	$(CC)  -O2 -DKERN_DEOPT $(CFLAGS) $^ -o $@$(EXT)
 
-fullbenchK3 : lz4.c lz4hc.c lzjb.c xxhash.c fullbench.c
+fullbenchK3 : lz4.c lz4hc.c lzjb.c lzxx.c xxhash.c fullbench.c
 	$(CC)  -O3 -DKERN_DEOPT $(CFLAGS) $^ -o $@$(EXT)
 
-fullbenchO2  : lz4.c lz4hc.c lzjb.c xxhash.c fullbench.c
+fullbenchO2  : lz4.c lz4hc.c lzjb.c lzxx.c xxhash.c fullbench.c
 	$(CC)    -O2 $(CFLAGS) $^ -o $@$(EXT)
 
-fullbenchO1  : lz4.c lz4hc.c lzjb.c xxhash.c fullbench.c
-	$(CC)    -O1 $(CFLAGS) $^ -o $@$(EXT)
+fullbenchO1  : lz4.c lz4hc.c lzjb.c lzxx.c xxhash.c fullbench.c
+	$(CC)    -O1 -ggdb $(CFLAGS) $^ -o $@$(EXT)
 
-fullbench-dbg  : lz4.c lz4hc.c lzjb.c xxhash.c fullbench.c
+fullbench-dbg  : lz4.c lz4hc.c lzjb.c lzxx.c xxhash.c fullbench.c
 	$(CC)    -ggdb $(CFLAGS) $^ -o $@$(EXT)
 
-fullbench32: lz4.c lz4hc.c lzjb.c xxhash.c fullbench.c
+fullbench32: lz4.c lz4hc.c lzjb.c lzxx.c xxhash.c fullbench.c
 	$(CC) -m32 -O3 $(CFLAGS) $^ -o $@$(EXT)
 
 clean:
